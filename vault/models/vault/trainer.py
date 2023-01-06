@@ -96,6 +96,46 @@ class VaultTrainerForMVSA(VaultTrainerForBloombergTwitterCorpus):
         super().__init__(*args, **kwargs)
         self.preprocessed = self.dataset.preprocessed
 
+    def get_eval_preds_from_batch(self, logits: torch.Tensor) -> List[int]:
+        if self.preprocessed:
+            return logits.argmax(-1).tolist()
+
+        n_logits = logits.shape[-1]
+        logit_groups = [
+            logits[..., : n_logits // 2],
+            logits[..., n_logits // 2 :],
+        ]
+
+        return [
+            [tl.argmax(-1).tolist(), vl.argmax(-1).tolist()]
+            for tl, vl in zip(*logit_groups)
+        ]
+
+    def calculate_loss(
+        self, logits: torch.Tensor, labels: torch.Tensor, train: bool
+    ) -> torch.Tensor:
+        """Calculates loss based on predicted logits and labels.
+        Args:
+            logits: model predictions.
+            labels: ground truth labels.
+            train: whether this is during training.
+        Returns:
+            Loss.
+        """
+        criterion = nn.CrossEntropyLoss()
+        if self.preprocessed:
+            return criterion(logits, labels)
+
+        n_logits = logits.shape[-1]
+        logit_groups = [
+            logits[..., : n_logits // 2],
+            logits[..., n_logits // 2 :],
+        ]
+        return 0.5 * (
+            criterion(logit_groups[0], labels[..., 0])
+            + criterion(logit_groups[1], labels[..., 1])
+        )
+
     def evaluation_metrics(
         self,
         eval_true: List[List[int]],

@@ -590,7 +590,7 @@ class MVSA(VisionAndLanguageDataset):
             labels = [aggregate_modalities(l, str2int) for l in labels]
             remove_nones(labels, ids)
 
-        labels = torch.tensor(labels, dtype=float)
+        labels = torch.tensor(labels, dtype=int)
 
         # SPLITS
         _dev_size = max(1, int(self._dev_ratio * len(ids)))

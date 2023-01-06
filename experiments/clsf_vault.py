@@ -28,12 +28,13 @@ from vault.utils import demojizer_selector
 from utils import general_argparse_args, add_arguments
 
 
-def num_outputs(task, preprocessed=None):
+def num_outputs(task, preprocessed=False):
     if task == "Twitter201X":
         return 3
-    if task == "Bloomberg" or preprocessed:
+    if task == "MVSA":
+        return 3 * (int(not preprocessed) + 1)
+    if task == "Bloomberg":
         return 1
-    return 2
 
 
 DATASET = {
