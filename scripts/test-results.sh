@@ -67,7 +67,7 @@ python experiments/clsf_vault.py Bloomberg --root_dir $bloomberg_dir \
 python experiments/clsf_vault.py MVSA --root_dir $mvsa_dir/MVSA \
     --vilt_model dandelin/vilt-b32-mlm --train_split train dev --test_split test \
     --image_augmentation --preprocessed --device $device --train_batch_size 16 \
-    --num_train_epochs 5 --reps $reps --max_num_workers 5
+    --num_train_epochs 2 --reps $reps --max_num_workers 5
 
 python experiments/clsf_vault.py MVSA --root_dir $mvsa_dir/MVSA_Single \
     --vilt_model dandelin/vilt-b32-mlm --train_split train dev --test_split test \
@@ -78,7 +78,7 @@ python experiments/clsf_vault.py MVSA --root_dir $mvsa_dir/MVSA \
     --vilt_model dandelin/vilt-b32-mlm --bert_model bert-base-uncased \
     --train_split train dev --test_split test \
     --image_augmentation --preprocessed --device $device --train_batch_size 16 \
-    --num_train_epochs 5 --reps $reps --max_num_workers 5
+    --num_train_epochs 3 --reps $reps --max_num_workers 5
 
 python experiments/clsf_vault.py MVSA --root_dir $mvsa_dir/MVSA_Single \
     --vilt_model dandelin/vilt-b32-mlm --bert_model bert-base-uncased \
@@ -90,10 +90,11 @@ python experiments/clsf_vault.py MVSA --root_dir $mvsa_dir/MVSA \
     --vilt_model dandelin/vilt-b32-mlm --bert_model vinai/bertweet-base \
     --train_split train dev --test_split test \
     --image_augmentation --preprocessed --device $device --train_batch_size 16 \
-    --num_train_epochs 10 --reps $reps --max_num_workers 5
+    --num_train_epochs 2 --reps $reps --max_num_workers 5
 
 python experiments/clsf_vault.py MVSA --root_dir $mvsa_dir/MVSA_Single \
     --vilt_model dandelin/vilt-b32-mlm --bert_model vinai/bertweet-base \
     --train_split train dev --test_split test \
     --image_augmentation --preprocessed --device $device --train_batch_size 16 \
-    --num_train_epochs 8 --reps $reps --max_num_workers 5
+    --num_train_epochs 9 --reps $reps --max_num_workers 5
+
