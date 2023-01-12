@@ -1,6 +1,6 @@
 # VAuLT: Vision-and-Augmented-Language Transformer
 
-Code for [VAuLT: Augmenting the Vision-and-Language Transformer with the Propagation of Deep Language Representations](https://arxiv.org/abs/2208.09021).
+Code for [VAuLT: Augmenting the Vision-and-Language Transformer For Sentiment Classification on Social Media](https://arxiv.org/abs/2208.09021).
 
 ![VAuLT](./media/vault.png)
 
