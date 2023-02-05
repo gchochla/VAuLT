@@ -15,8 +15,6 @@ setup(
         "torchvision",
         "scikit-learn",
         "recordclass",
-        "REL @ git+https://github.com/informagi/REL.git@main",
-        "wikipedia",
         "emoji",
         "ekphrasis",
         "matplotlib",
