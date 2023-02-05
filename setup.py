@@ -16,6 +16,8 @@ setup(
         "scikit-learn",
         "recordclass",
         "emoji",
+        "REL @ git+https://github.com/informagi/REL.git@635429a49cb3de3d8f5f27838cb4e41905e058be",
+        "wikipedia",
         "ekphrasis",
         "matplotlib",
         "pyyaml",
