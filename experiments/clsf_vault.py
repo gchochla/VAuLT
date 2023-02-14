@@ -14,11 +14,6 @@ from vault.models.vault import (
     VaultProcessor,
 )
 from vault.utils import LOGGING_FORMAT
-from vault.entity_linking import (
-    integrate_entities_into_model,
-    set_entity_linker_subparser,
-    get_entity_linker_kwargs,
-)
 from vault.logging_utils import ExperimentHandler
 from vault.train_utils import MyTrainingArguments
 from vault.utils import twitter_preprocessor
@@ -65,13 +60,11 @@ def parse_args():
                 action="store_true",
                 help="whether to create $T$ token explicitly",
             )
-            set_entity_linker_subparser(sp_task)
 
     return parser.parse_args()
 
 
 def main():
-
     args = parse_args()
 
     task = args.task
@@ -106,7 +99,6 @@ def main():
             tokenizer=processor,
             crop_size=args.crop_size,
             preprocess_on_fetch=args.preprocess_on_fetch,
-            entity_linker_kwargs=get_entity_linker_kwargs(args),
         )
         if task == "Twitter201X"
         else dict(
@@ -208,17 +200,6 @@ def main():
         ):
             model.resize_token_embeddings(len(processor.tokenizer))
 
-        if task == "Twitter201X":
-            entity_descriptions = copy(train_dataset.entity_descriptions)
-            if dev_dataset is not None:
-                entity_descriptions.extend(dev_dataset.entity_descriptions)
-            if test_dataset is not None:
-                entity_descriptions.extend(test_dataset.entity_descriptions)
-
-            integrate_entities_into_model(
-                model, entity_descriptions, processor.tokenizer
-            )
-
         # setup parents and disable param for comparison
         experiment_handler.disable_params(["disable_tqdm", "device", "no_cuda"])
 
@@ -237,8 +218,6 @@ def main():
             names_list += [
                 "add_placeholder_token",
             ]
-            if args.entity_linker is not None:
-                names_list.append("threshold")
         experiment_handler.name_params(names_list)
 
         trainer = TRAINER[task](

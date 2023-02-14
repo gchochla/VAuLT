@@ -12,11 +12,6 @@ from vault.models.tombert import (
 )
 from vault.models.tomvilt import TomViltWithResNetForTMSC
 from vault.utils import LOGGING_FORMAT
-from vault.entity_linking import (
-    integrate_entities_into_model,
-    set_entity_linker_subparser,
-    get_entity_linker_kwargs,
-)
 from vault.train_utils import MyTrainingArguments
 from vault.logging_utils import ExperimentHandler
 
@@ -44,22 +39,17 @@ def parse_args():
         add_arguments(sp_model, TomBertDatasetForTMSC.argparse_args)
         add_arguments(sp_model, TomBertTrainerForTMSC.argparse_args)
         add_arguments(sp_model, general_argparse_args)
-        # NOTE: use "entity_linker" to activate
-        set_entity_linker_subparser(sp_model)
 
     return parser.parse_args()
 
 
 def main():
-
     args = parse_args()
 
     reps = args.reps
     del args.reps
     description = args.description
     del args.description
-
-    entity_linker_kwargs = get_entity_linker_kwargs(args)
 
     logging_level = getattr(logging, args.logging_level)
     logging.basicConfig(
@@ -88,7 +78,6 @@ def main():
         tokenizer=tokenizer,
         crop_size=args.crop_size,
         preprocess_on_fetch=args.preprocess_on_fetch,
-        entity_linker_kwargs=entity_linker_kwargs,
     )
     dev_dataset = (
         TomBertDatasetForTMSC(
@@ -99,7 +88,6 @@ def main():
             tokenizer=tokenizer,
             crop_size=args.crop_size,
             preprocess_on_fetch=False,
-            entity_linker_kwargs=entity_linker_kwargs,
         )
         if args.dev_split is not None
         else None
@@ -113,7 +101,6 @@ def main():
             tokenizer=tokenizer,
             crop_size=args.crop_size,
             preprocess_on_fetch=False,
-            entity_linker_kwargs=entity_linker_kwargs,
         )
         if args.test_split is not None
         else None
@@ -173,14 +160,6 @@ def main():
         if args.add_placeholder_token:
             model.resize_token_embeddings(len(tokenizer))
 
-        entity_descriptions = copy(train_dataset.entity_descriptions)
-        if dev_dataset is not None:
-            entity_descriptions.extend(dev_dataset.entity_descriptions)
-        if test_dataset is not None:
-            entity_descriptions.extend(test_dataset.entity_descriptions)
-
-        integrate_entities_into_model(model, entity_descriptions, tokenizer)
-
         # setup parents and disable param for comparison
         experiment_handler.disable_params(["disable_tqdm", "device", "no_cuda"])
 
@@ -207,8 +186,6 @@ def main():
         names_list = list(extra_names) + [
             "add_placeholder_token",
         ]
-        if args.entity_linker is not None:
-            names_list.append("threshold")
         experiment_handler.name_params(names_list)
 
         trainer = TomBertTrainerForTMSC(

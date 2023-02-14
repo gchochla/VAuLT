@@ -170,7 +170,6 @@ class VaultDatasetForTMSC(Twitter201XDataset):
         crop_size: int,
         image_dir: Optional[str] = None,
         logging_level: Optional[int] = None,
-        entity_linker_kwargs: Optional[Dict[str, Any]] = None,
         preprocess_on_fetch: Optional[bool] = True,
     ):
         """Init.
@@ -193,7 +192,6 @@ class VaultDatasetForTMSC(Twitter201XDataset):
             tokenizer,
             image_dir=image_dir,
             logging_level=logging_level,
-            entity_linker_kwargs=entity_linker_kwargs,
             **{"max_length": max_length},
         )
 
@@ -254,7 +252,6 @@ class VaultDatasetForTMSC(Twitter201XDataset):
         data = {}
 
         for example in examples:
-
             text = (
                 example.targetless_tweet
                 + self.text_tokenizer.special_tokens_map["sep_token"]
@@ -349,7 +346,6 @@ class VaultDatasetForTMSC(Twitter201XDataset):
     def collate_fn(
         self, batch: Tuple[Tuple[torch.Tensor, List[List[int]], None]]
     ) -> Tuple[torch.Tensor, List[torch.Tensor], List[List[List[int]]], None]:
-
         ret = []
         for val in zip(*batch):
             try:

@@ -54,7 +54,6 @@ class TomBertDatasetForTMSC(Twitter201XDataset):
         image_dir: Optional[str] = None,
         logging_level: Optional[Union[int, str]] = None,
         preprocess_on_fetch: bool = False,
-        entity_linker_kwargs: Optional[Dict[str, Any]] = None,
     ):
         """Init.
 
@@ -75,7 +74,6 @@ class TomBertDatasetForTMSC(Twitter201XDataset):
             tokenizer,
             image_dir=image_dir,
             logging_level=logging_level,
-            entity_linker_kwargs=entity_linker_kwargs,
             **{
                 "max_total_length": max_total_length,
                 "max_target_length": max_target_length,

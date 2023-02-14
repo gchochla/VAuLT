@@ -13,8 +13,6 @@ from transformers import PreTrainedTokenizerBase
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from vault.entity_linking import EntityLinker
-
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
@@ -110,7 +108,6 @@ class Twitter201XDataset(Dataset, ABC):
         tokenizer: PreTrainedTokenizerBase,
         image_dir: Optional[str] = None,
         logging_level: Optional[int] = None,
-        entity_linker_kwargs: Optional[Dict[str, Any]] = None,
         **encode_kwargs,
     ):
         """Init.
@@ -145,8 +142,6 @@ class Twitter201XDataset(Dataset, ABC):
 
         self.tokenizer = tokenizer
 
-        self.init_entity_linker(entity_linker_kwargs)
-
         file_lines = self._read_tsv()
         examples = self._parse_lines(file_lines)
 
@@ -155,8 +150,6 @@ class Twitter201XDataset(Dataset, ABC):
         self.label_mapping = {l: i for i, l in enumerate(sorted(labels))}
 
         self.data_class = self.define_data_struct()
-
-        self.entity_integration(examples)
 
         self.data = self.encode_plus(
             examples,
@@ -182,105 +175,7 @@ class Twitter201XDataset(Dataset, ABC):
     def encode_plus(self, examples, **encode_kwargs):
         """Prepares the inputs of the neural nets."""
 
-    def init_entity_linker(self, kwargs: Union[Dict[str, Any], None]):
-        """Initializes entity linker if its kwargs
-        were provided, else `None`.
-
-        Args:
-            kwargs: `EntityLinker` keyword arguments.
-        """
-
-        def read_entities_filename(filename):
-            with open(filename) as fp:
-                try:
-                    data = json.load(fp)
-                    if data:
-                        return data
-                except json.decoder.JSONDecodeError:
-                    pass
-
-        def cache(example, rets):
-            self.entity_data[example.id] = rets
-
-        if kwargs:
-            # need to integrate threshold because of None descriptions
-            self.entities_filename = os.path.join(
-                kwargs["root_dir"],
-                self.dir.replace(os.path.sep, "__")
-                + f"__{self.kind}__{kwargs['wiki_version']}__"
-                f"{kwargs['threshold']}__entities.json",
-            )
-
-            if os.path.isfile(self.entities_filename):
-                data = read_entities_filename(self.entities_filename)
-                if data is not None:
-                    self.cache = lambda *args, **kwargs: None
-                    self.entity_data = data
-                    self.entity_linker = lambda example: self.entity_data[
-                        example.id
-                    ]
-                else:
-                    self.entity_linker = EntityLinker(**kwargs)
-                    self.entity_data = {}
-                    self.cache = cache
-            else:
-                self.entity_linker = EntityLinker(**kwargs)
-                self.entity_data = {}
-                self.cache = cache
-
-            self.entity_descriptions = []
-        else:
-            self.entities_filename = None
-            self.entity_linker = None
-            self.cached = False
-            self.entity_descriptions = []
-
-    def _link_entity(
-        self, example: Twitter201XInfo
-    ) -> Union[None, Tuple[str, str]]:
-        """Links target to Wikipedia entity.
-
-        Args:
-            example: tweet info.
-
-        Returns:
-            The Wikipedia entity and its description if one is found and
-            confidence is high enough, else `None`.
-        """
-        if self.entity_linker:
-            ret = self.entity_linker(example)
-            self.cache(example, ret)
-            if ret is None:
-                return
-            entity, description, conf = ret
-            if description is None:
-                return
-            return entity, description
-
-    def entity_integration(self, examples: List[Twitter201XInfo]):
-        """Integrates entity token into tokenizer
-        and prepares descriptions for model.
-
-        Args:
-            example: tweet info.
-        """
-        for example in examples:
-            ret = self._link_entity(example)
-            if ret:
-                entity, description = ret
-                token = f"[{entity}]"
-                example.target += "/" + token
-
-                res = self.text_tokenizer.add_tokens([token])
-
-                # only append description if token is added for the first time
-                if res == 1:
-                    # NOTE: same order
-                    self.entity_descriptions.append(description)
-
-        if self.entities_filename:
-            with open(self.entities_filename, "w") as fp:
-                json.dump(self.entity_data, fp)
+    # removed init_entity_linker, _link_entity, and entity_integration
 
     def load_image(self, example: Twitter201XInfo) -> Tuple[torch.Tensor, bool]:
         """Loads and transforms image.
