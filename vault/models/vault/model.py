@@ -44,6 +44,11 @@ class VaultMixin(nn.Module, ABC):
         freeze_lm=dict(
             action="store_true", help="whether to freeze language model"
         ),
+        use_vilt_position_embeddings=dict(
+            action="store_true",
+            help="whether to use Vilt's position embeddings",
+            metadata=dict(name=True),
+        ),
     )
 
     def __init__(
@@ -52,6 +57,7 @@ class VaultMixin(nn.Module, ABC):
         bert_config: Optional[PretrainedConfig] = None,
         freeze_lm: bool = False,
         vilt_dropout_prob: float = 0.0,
+        use_vilt_position_embeddings: bool = False,
         *args,
         **kwargs,
     ):
@@ -68,6 +74,10 @@ class VaultMixin(nn.Module, ABC):
         vilt_config.attention_probshidden_dropou_dropout_prob = (
             vilt_dropout_prob
         )
+
+        # if language model is used, skip ViLT's position embeddings
+        if bert_config is not None and not use_vilt_position_embeddings:
+            setattr(vilt_config, "position_embedding_type", "NOT_absolute")
 
         super().__init__(vilt_config, *args, **kwargs)
         self.bert = (
@@ -86,6 +96,7 @@ class VaultMixin(nn.Module, ABC):
         pretrained_vilt: str,
         pretrained_bert: Optional[str] = None,
         freeze_lm: bool = False,
+        use_vilt_position_embeddings: bool = False,
         *args,
         **kwargs,
     ):
@@ -98,6 +109,12 @@ class VaultMixin(nn.Module, ABC):
             model_args, kwargs: vilt params.
         """
         model = super().from_pretrained(pretrained_vilt, *args, **kwargs)
+
+        # if language model is used, can skip ViLT's position embeddings
+        if pretrained_bert is not None and not use_vilt_position_embeddings:
+            model.embeddings.text_embeddings.position_embedding_type = (
+                "NOT_absolute"
+            )
 
         model.bert = (
             AutoModel.from_pretrained(pretrained_bert, add_pooling_layer=False)
@@ -142,7 +159,6 @@ class VaultMixin(nn.Module, ABC):
             Potentially overwritten args and kwargs.
         """
         if self.bert is not None:
-
             input_ids = kwargs.get(
                 "input_ids", args[0] if len(args) > 0 else None
             )
@@ -212,7 +228,6 @@ class PipelineVaultMixin(VaultMixin):
         *args,
         **kwargs,
     ):
-
         vilt_device_id = kwargs.pop("vilt_device_id", None)
         lm_device_id = kwargs.pop("lm_device_id", None)
         output_device_id = kwargs.pop("output_device_id", None)
@@ -243,7 +258,6 @@ class PipelineVaultMixin(VaultMixin):
         return model
 
     def pipeline(self, vilt_device_id, lm_device_id, output_device_id):
-
         self.pipelined = lm_device_id is not None and vilt_device_id is not None
         if self.pipelined:
             self.lm_device = f"cuda:{lm_device_id}"

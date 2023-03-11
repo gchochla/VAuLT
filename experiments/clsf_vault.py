@@ -71,7 +71,6 @@ def parse_args():
 
 
 def main():
-
     args = parse_args()
 
     task = args.task
@@ -200,6 +199,7 @@ def main():
             freeze_lm=args.freeze_lm,
             n_classes=n_classes,
             vilt_dropout_prob=args.vilt_dropout_prob,
+            use_vilt_position_embeddings=args.use_vilt_position_embeddings,
         )
 
         if (

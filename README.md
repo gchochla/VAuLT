@@ -42,7 +42,11 @@ bert_model_name_or_path = "vinai/bertweet-base"
 processor = VaultProcessor.from_pretrained(
     vilt_model_name_or_path, bert_model_name_or_path
 )
-model = VaultModel.from_pretrained(vilt_model_name_or_path, bert_model_name_or_path)
+model = VaultModel.from_pretrained(
+    vilt_model_name_or_path,
+    bert_model_name_or_path
+    use_vilt_position_embeddings=False,
+)
 
 url = "http://images.cocodataset.org/val2017/000000039769.jpg"
 image = Image.open(requests.get(url, stream=True).raw)
