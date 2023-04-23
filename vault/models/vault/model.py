@@ -47,7 +47,6 @@ class VaultMixin(nn.Module, ABC):
         use_vilt_position_embeddings=dict(
             action="store_true",
             help="whether to use Vilt's position embeddings",
-            metadata=dict(name=True),
         ),
     )
 
