@@ -8,7 +8,7 @@ setup(
     author_email="chochlak@usc.edu",
     packages=find_packages(),
     install_requires=[
-        "transformers==4.36.0",
+        "transformers==4.38.0",
         "torch==1.13.1",
         "numpy",
         "pandas",
