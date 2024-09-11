@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "transformers==4.38.0",
-        "torch==1.13.1",
+        "torch==2.2.0",
         "numpy",
         "pandas",
         "torchvision",
